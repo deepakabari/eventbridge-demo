@@ -1,8 +1,8 @@
 service: eventbridge-demo
- 
+
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs20.x
   region: ap-south-1
   iam:
     role:
@@ -11,7 +11,7 @@ provider:
           Action:
             - events:PutEvents
           Resource: arn:aws:events:ap-south-1:203918851056:event-bus/dev-test
- 
+
 functions:
   eventDispatcher:
     handler: handler.dispatchEvent
@@ -19,7 +19,11 @@ functions:
       - http:
           path: dispatch
           method: post
- 
+      - schedule:
+          name: EventBridgeSchedule
+          description: 'Invoke the eventDispatcher every day at 10:00 AM IST'
+          rate: cron(30 4 * * ? *)
+
   eventConsumer:
     handler: handler.consumeEvent
     events:
@@ -30,9 +34,6 @@ functions:
               - testingSource
             detail-type:
               - myEvent
-      - http:
-          path: consume
-          method: post
 
 resources:
   Resources:
@@ -40,7 +41,7 @@ resources:
       Type: AWS::Events::Rule
       Properties:
         Name: MyEventRule
-        EventBusName:  arn:aws:events:ap-south-1:203918851056:event-bus/dev-test
+        EventBusName: arn:aws:events:ap-south-1:203918851056:event-bus/dev-test
         EventPattern:
           source:
             - testingSource
@@ -49,11 +50,10 @@ resources:
         State: ENABLED
         Targets:
           - Id: TargetFunctionV1
-            Arn: 
+            Arn:
               Fn::GetAtt:
                 - EventConsumerLambdaFunction
                 - Arn
- 
- 
+
 plugins:
   - serverless-offline

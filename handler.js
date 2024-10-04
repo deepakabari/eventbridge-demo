@@ -4,7 +4,23 @@ const { EventBridgeClient, PutEventsCommand } = require('@aws-sdk/client-eventbr
 const eventBridgeClient = new EventBridgeClient({ region: 'ap-south-1' });
 
 module.exports.dispatchEvent = async event => {
-  const body = JSON.parse(event.body);
+  let body;
+
+  if (event.body) {
+    try {
+      body = JSON.parse(event.body);
+    } catch (error) {
+      console.error('Error parsing JSON:', error);
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: 'Invalid JSON in request body'
+        })
+      };
+    }
+  } else {
+    body = { message: 'Hello from EventBridge Scheduler!' };
+  }
 
   // Construct the event to dispatch
   const params = {
