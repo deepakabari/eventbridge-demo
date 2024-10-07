@@ -1,4 +1,4 @@
-service: eventbridge-demo
+service: eventbridge-demo1
 
 provider:
   name: aws
@@ -37,6 +37,10 @@ functions:
 
 resources:
   Resources:
+    CustomEventBus:
+      Type: AWS::Events::EventBus
+      Properties:
+        Name: dev-test
     MyEventRule:
       Type: AWS::Events::Rule
       Properties:
