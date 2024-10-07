@@ -4,16 +4,15 @@
   "main": "handler.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "serverless offline start",
-    "deploy": "serverless deploy --region=ap-south-1"
+    "start": "STAGE=dev serverless offline start",
+    "deploy": "serverless deploy --region=ap-south-1 --verbose --conceal"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "serverless": "^3.39.0",
-    "serverless-offline-aws-eventbridge": "^2.2.2"
+    "serverless": "^3.39.0"
   },
   "devDependencies": {
     "@aws-sdk/client-eventbridge": "^3.662.0",

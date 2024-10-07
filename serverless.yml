@@ -1,63 +1,137 @@
-service: eventbridge-demo1
+service: serverless-eventbridge-demo
+frameworkVersion: '3'
+useDotenv: true
 
 provider:
   name: aws
   runtime: nodejs20.x
   region: ap-south-1
-  iam:
-    role:
-      statements:
-        - Effect: Allow
-          Action:
-            - events:PutEvents
-          Resource: arn:aws:events:ap-south-1:203918851056:event-bus/dev-test
+  stage: 'dev'
+  environment: 
+    STAGE: ${self:provider.stage}
+    REGION: ${self:provider.region}
+    NODE_ENV: ${env:STAGE}
+    CUSTOM_EVENT_BUS_ARN: ${env:CUSTOM_EVENT_BUS_ARN}
+    DEFAULT_EVENT_BUS_ARN: ${env:DEFAULT_EVENT_BUS_ARN}
+    EVENT_BRIDGE_SOURCE: ${env:EVENT_BRIDGE_SOURCE}
+    EVENT_TYPE: ${env:EVENT_TYPE}
+    ACCOUNT_ID: ${env:ACCOUNT_ID}
 
 functions:
   eventDispatcher:
     handler: handler.dispatchEvent
+    role: DemoApiRole
     events:
       - http:
           path: dispatch
           method: post
-      - schedule:
-          name: EventBridgeSchedule
-          description: 'Invoke the eventDispatcher every day at 10:00 AM IST'
-          rate: cron(30 4 * * ? *)
 
   eventConsumer:
     handler: handler.consumeEvent
+    role: DemoApiRole
     events:
       - eventBridge:
-          eventBus: arn:aws:events:ap-south-1:203918851056:event-bus/dev-test
+          eventBus: ${self:provider.environment.CUSTOM_EVENT_BUS_ARN}
           pattern:
             source:
-              - testingSource
+              - ${self:provider.environment.EVENT_BRIDGE_SOURCE}
             detail-type:
-              - myEvent
+              - ${self:provider.environment.EVENT_TYPE}
+
+  eventConsumer1:
+    handler: handler.consumeEvent
+    role: DemoApiRole
+    events:
+      - eventBridge:
+          eventBus: ${self:provider.environment.DEFAULT_EVENT_BUS_ARN}
+          pattern:
+            source:
+              - ${self:provider.environment.EVENT_BRIDGE_SOURCE}
+            detail-type:
+              - ${self:provider.environment.EVENT_TYPE}
 
 resources:
   Resources:
-    CustomEventBus:
-      Type: AWS::Events::EventBus
+    ApiGatewayRestApi:
+      Type: AWS::ApiGateway::RestApi
       Properties:
-        Name: dev-test
-    MyEventRule:
+        Name: '${self:provider.stage}-${self:service}'
+    ForwardToSharedEventBusRule:
       Type: AWS::Events::Rule
       Properties:
-        Name: MyEventRule
-        EventBusName: arn:aws:events:ap-south-1:203918851056:event-bus/dev-test
+        Name: ${self:service}-${self:provider.stage}-forward-to-shared-event-bus-rule
+        EventBusName: ${self:provider.environment.DEFAULT_EVENT_BUS_ARN}
         EventPattern:
           source:
-            - testingSource
+            - ${self:provider.environment.EVENT_BRIDGE_SOURCE}
           detail-type:
-            - myEvent
+            - ${self:provider.environment.EVENT_TYPE}
         State: ENABLED
         Targets:
-          - Id: TargetFunctionV1
-            Arn:
-              Fn::GetAtt:
-                - EventConsumerLambdaFunction
-                - Arn
+          - Id: 'forward-to-shared-event-bus'
+            Arn: ${self:provider.environment.CUSTOM_EVENT_BUS_ARN}
+            RoleArn: !GetAtt EventTargetRole.Arn
+      DependsOn:
+      - EventTargetRole
+
+    EventTargetRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:service}-event-role-${self:provider.stage}
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: events.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: ${self:service}-eventbridge-policy-${self:provider.stage}
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - events:PutEvents
+                  Resource:
+                    - ${self:provider.environment.CUSTOM_EVENT_BUS_ARN}
+
+    DemoApiRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:service}-lambda-role-${self:provider.stage}
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement: 
+            - Effect: Allow
+              Principal:
+                Service: 
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: ${self:service}-cloudwatch-policy-${self:provider.stage}
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                    - logs:DescribeLogGroups
+                    - logs:DescribeLogStreams
+                  Resource:
+                    - arn:aws:logs:${self:provider.region}:${env:ACCOUNT_ID}:log-group:*:*:*
+          - PolicyName: ${self:service}-eventbridge-policy-${self:provider.stage}
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - events:PutEvents
+                  Resource:
+                    - ${self:provider.environment.CUSTOM_EVENT_BUS_ARN}
+                    - ${self:provider.environment.DEFAULT_EVENT_BUS_ARN}
 
 plugins:
   - serverless-offline

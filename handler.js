@@ -26,9 +26,9 @@ module.exports.dispatchEvent = async event => {
   const params = {
     Entries: [
       {
-        EventBusName: 'arn:aws:events:ap-south-1:203918851056:event-bus/dev-test',
-        Source: 'testingSource',
-        DetailType: 'myEvent',
+        EventBusName: process.env.DEFAULT_EVENT_BUS_ARN,
+        Source: process.env.EVENT_BRIDGE_SOURCE,
+        DetailType: process.env.EVENT_TYPE,
         Detail: JSON.stringify({
           message: body.message || 'Hello from EventBridge!'
         })
