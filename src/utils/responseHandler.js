@@ -1,9 +1,7 @@
-const createResponse = (statusCode, message, data = {}) => ({
+export const createResponse = (statusCode, message, data = {}) => ({
   statusCode,
   body: JSON.stringify({
     message,
     ...data
   })
 });
-
-module.exports = { createResponse };

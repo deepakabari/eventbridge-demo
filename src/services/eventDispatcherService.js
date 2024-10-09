@@ -1,8 +1,9 @@
-const { PutEventsCommand } = require('@aws-sdk/client-eventbridge');
-const eventBridgeClient = require('../utils/eventBridgeClient');
-const { createResponse } = require('../utils/responseHandler');
+import { PutEventsCommand } from '@aws-sdk/client-eventbridge';
+import awsClients from '../utils/awsClient.js';
+const { eventBridgeClient } = awsClients;
+import { createResponse } from '../utils/responseHandler.js';
 
-const dispatchEventToEventBridge = async params => {
+export const dispatchEventToEventBridge = async params => {
   try {
     const command = new PutEventsCommand(params);
     const result = await eventBridgeClient.send(command);
@@ -13,5 +14,3 @@ const dispatchEventToEventBridge = async params => {
     return createResponse(500, 'Failed to dispatch event', { error: error.message });
   }
 };
-
-module.exports = { dispatchEventToEventBridge };

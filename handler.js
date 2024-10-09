@@ -1,7 +1,6 @@
-const { dispatchEvent } = require('./src/handlers/dispatchEvent');
-const { consumeEvent } = require('./src/handlers/consumeEvent');
+import { dispatchEvent } from './src/handlers/dispatchEvent.js';
+import { consumeEvent } from './src/handlers/consumeEvent.js';
+import { sqsSenderEvent } from './src/handlers/sqsSender.js';
+import { sqsReceiverEvent } from './src/handlers/sqsReceiver.js';
 
-module.exports = {
-  dispatchEvent,
-  consumeEvent
-};
+export { dispatchEvent, consumeEvent, sqsSenderEvent, sqsReceiverEvent };

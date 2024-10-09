@@ -16,6 +16,10 @@ provider:
     EVENT_BRIDGE_SOURCE: ${env:EVENT_BRIDGE_SOURCE}
     EVENT_TYPE: ${env:EVENT_TYPE}
     ACCOUNT_ID: ${env:ACCOUNT_ID}
+    SQS_QUEUE_URL: !Ref MyQueue
+
+plugins:
+  - serverless-offline
 
 functions:
   eventDispatcher:
@@ -43,19 +47,49 @@ functions:
     role: DemoApiRole
     events:
       - eventBridge:
-          eventBus: ${self:provider.environment.DEFAULT_EVENT_BUS_ARN}
           pattern:
             source:
               - ${self:provider.environment.EVENT_BRIDGE_SOURCE}
             detail-type:
               - ${self:provider.environment.EVENT_TYPE}
 
+  sqsSender:
+    handler: handler.sqsSenderEvent
+    role: DemoApiRole
+    environment:
+      SQS_QUEUE_URL: !Ref MyQueue
+    events:
+      - http:
+          path: send
+          method: post
+
+  sqsReceiver:
+    handler: handler.sqsReceiverEvent
+    role: DemoApiRole
+    events:
+      # - schedule:
+      #     rate: rate(5 minutes)
+      - http:
+          path: receive
+          method: get
+
 resources:
   Resources:
+    EventBus:
+      Type: AWS::Events::EventBus
+      Properties:
+        Name: custom-bus-dev
+        
+    MyQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: myQueue-dev
+
     ApiGatewayRestApi:
       Type: AWS::ApiGateway::RestApi
       Properties:
         Name: '${self:provider.stage}-${self:service}'
+
     ForwardToSharedEventBusRule:
       Type: AWS::Events::Rule
       Properties:
@@ -132,6 +166,14 @@ resources:
                   Resource:
                     - ${self:provider.environment.CUSTOM_EVENT_BUS_ARN}
                     - ${self:provider.environment.DEFAULT_EVENT_BUS_ARN}
-
-plugins:
-  - serverless-offline
+          - PolicyName: ${self:service}-sqs-policy-${self:provider.stage}
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - sqs:SendMessage
+                    - sqs:ReceiveMessage
+                    - sqs:DeleteMessage
+                  Resource:
+                    - !GetAtt MyQueue.Arn

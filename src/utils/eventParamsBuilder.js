@@ -1,4 +1,4 @@
-const buildEventParams = message => {
+export const buildEventParams = message => {
   return {
     Entries: [
       {
@@ -10,5 +10,3 @@ const buildEventParams = message => {
     ]
   };
 };
-
-module.exports = { buildEventParams };

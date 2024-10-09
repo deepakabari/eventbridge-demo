@@ -1,6 +1,6 @@
-const { buildEventParams } = require('../utils/eventParamsBuilder');
-const { dispatchEventToEventBridge } = require('../services/eventDispatcherService');
-const { createResponse } = require('../utils/responseHandler');
+import { buildEventParams } from '../utils/eventParamsBuilder.js';
+import { dispatchEventToEventBridge } from '../services/eventDispatcherService.js';
+import { createResponse } from '../utils/responseHandler.js';
 
 const dispatchEvent = async event => {
   let body;
@@ -16,4 +16,4 @@ const dispatchEvent = async event => {
   return await dispatchEventToEventBridge(params);
 };
 
-module.exports = { dispatchEvent };
+export { dispatchEvent };
