@@ -1,12 +1,15 @@
-export const buildEventParams = message => {
+import _ from 'lodash'
+import config from '../../config/default.js'
+
+export const buildEventParams = (message) => {
   return {
     Entries: [
       {
-        EventBusName: process.env.DEFAULT_EVENT_BUS_ARN,
-        Source: process.env.EVENT_BRIDGE_SOURCE,
-        DetailType: process.env.EVENT_TYPE,
+        EventBusName: _.get(config, 'defaultBus'),
+        Source: _.get(config, 'eventBridgeSource'),
+        DetailType: _.get(config, 'eventType'),
         Detail: JSON.stringify({ message })
       }
     ]
-  };
-};
+  }
+}

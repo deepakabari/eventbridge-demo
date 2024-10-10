@@ -1,7 +1,9 @@
-import { EventBridgeClient } from '@aws-sdk/client-eventbridge';
-import { SQSClient } from '@aws-sdk/client-sqs';
+import { EventBridgeClient } from '@aws-sdk/client-eventbridge'
+import { SQSClient } from '@aws-sdk/client-sqs'
+import config from '../../config/default.js'
+import _ from 'lodash'
 
-const eventBridgeClient = new EventBridgeClient({ region: process.env.REGION || 'ap-south-1' });
-const sqsClient = new SQSClient({ region: process.env.REGION });
+const eventBridgeClient = new EventBridgeClient({ region: _.get(config, 'aws.region') })
+const sqsClient = new SQSClient({ region: _.get(config, 'aws.region') })
 
-export default { eventBridgeClient, sqsClient };
+export default { eventBridgeClient, sqsClient }

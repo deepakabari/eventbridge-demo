@@ -4,4 +4,4 @@ export const createResponse = (statusCode, message, data = {}) => ({
     message,
     ...data
   })
-});
+})
