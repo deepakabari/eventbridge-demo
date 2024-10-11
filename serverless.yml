@@ -14,7 +14,6 @@ provider:
     CUSTOM_EVENT_BUS_ARN: ${env:CUSTOM_EVENT_BUS_ARN}
     DEFAULT_EVENT_BUS_ARN: ${env:DEFAULT_EVENT_BUS_ARN}
     EVENT_BRIDGE_SOURCE: ${env:EVENT_BRIDGE_SOURCE}
-    EVENT_TYPE: ${env:EVENT_TYPE}
     ACCOUNT_ID: ${env:ACCOUNT_ID}
     SQS_QUEUE_URL: !Ref MyQueue
 
@@ -101,7 +100,8 @@ resources:
           source:
             - ${self:provider.environment.EVENT_BRIDGE_SOURCE}
           detail-type:
-            - ${self:provider.environment.EVENT_TYPE}
+            - created
+            - updated
         State: ENABLED
         Targets:
           - Id: 'forward-to-shared-event-bus'

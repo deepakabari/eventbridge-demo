@@ -9,7 +9,7 @@ const dispatchEvent = async (event) => {
   try {
     body = event.body ? JSON.parse(event.body) : { message: 'Hello from EventBridge!' }
 
-    const eventType = body.eventType || _.get(config, 'eventType')
+    const eventType = body.eventType
 
     if (!['created', 'updated'].includes(eventType)) {
       return createResponse(400, 'Invalid eventType. It must be either "created" or "updated".', {
