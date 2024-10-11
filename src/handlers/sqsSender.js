@@ -10,7 +10,6 @@ export const sqsSenderEvent = async () => {
     timestamp: Date.now()
   }
 
-  // const queueUrl = process.env.SQS_QUEUE_URL;
   const queueUrl = _.get(config, 'sqsQueueUrl')
 
   try {

@@ -5,7 +5,6 @@ import { createResponse } from '../utils/responseHandler.js'
 
 export const sqsReceiverEvent = async () => {
   try {
-    // const queueUrl = process.env.SQS_QUEUE_URL;
     const queueUrl = _.get(config, 'sqsQueueUrl')
 
     const messages = await receiveMessagesFromQueue(queueUrl)

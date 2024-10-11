@@ -40,7 +40,8 @@ functions:
             source:
               - ${self:provider.environment.EVENT_BRIDGE_SOURCE}
             detail-type:
-              - ${self:provider.environment.EVENT_TYPE}
+              - created
+              - updated
 
   eventConsumer1:
     handler: handler.consumeEvent
@@ -51,7 +52,8 @@ functions:
             source:
               - ${self:provider.environment.EVENT_BRIDGE_SOURCE}
             detail-type:
-              - ${self:provider.environment.EVENT_TYPE}
+              - created
+              - updated
 
   sqsSender:
     handler: handler.sqsSenderEvent
