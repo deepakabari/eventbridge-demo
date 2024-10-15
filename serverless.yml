@@ -7,7 +7,7 @@ provider:
   runtime: nodejs20.x
   region: ap-south-1
   stage: 'dev'
-  environment: 
+  environment:
     STAGE: ${self:provider.stage}
     REGION: ${self:provider.region}
     NODE_ENV: ${env:STAGE}
@@ -74,13 +74,21 @@ functions:
           path: receive
           method: get
 
+  sesSendEmail:
+    handler: handler.sesSendEmail
+    role: DemoApiRole
+    events:
+      - http:
+          path: send-email
+          method: post
+
 resources:
   Resources:
     EventBus:
       Type: AWS::Events::EventBus
       Properties:
         Name: custom-bus-dev
-        
+
     MyQueue:
       Type: AWS::SQS::Queue
       Properties:
@@ -108,7 +116,7 @@ resources:
             Arn: ${self:provider.environment.CUSTOM_EVENT_BUS_ARN}
             RoleArn: !GetAtt EventTargetRole.Arn
       DependsOn:
-      - EventTargetRole
+        - EventTargetRole
 
     EventTargetRole:
       Type: AWS::IAM::Role
@@ -138,10 +146,10 @@ resources:
         RoleName: ${self:service}-lambda-role-${self:provider.stage}
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
-          Statement: 
+          Statement:
             - Effect: Allow
               Principal:
-                Service: 
+                Service:
                   - lambda.amazonaws.com
               Action: sts:AssumeRole
         Policies:
@@ -179,3 +187,15 @@ resources:
                     - sqs:DeleteMessage
                   Resource:
                     - !GetAtt MyQueue.Arn
+          - PolicyName: ${self:service}-ses-policy-${self:provider.stage}
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - ses:SendEmail
+                    - ses:SendRawEmail
+                    - ses:SendTemplatedEmail
+                    - ses:CreateTemplate
+                  Resource:
+                    - '*'

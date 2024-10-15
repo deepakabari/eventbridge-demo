@@ -1,14 +1,10 @@
 import { sqsSenderEvent } from '../handlers/sqsSender'
 import { sendMessageToQueue } from '../services/sqsService'
-import awsClients from '../utils/awsClient'
 
 jest.mock('../services/sqsService.js')
 jest.mock('../utils/awsClient.js')
 
 describe('Handler test', () => {
-  const queueUrl = 'https://sqs.us-east-1.amazonaws.com/123456789012/my-queue'
-  const messageBody = { id: '12345', name: 'Test Message', timestamp: Date.now() }
-
   describe('sqsSenderEvent', () => {
     beforeEach(() => {
       jest.clearAllMocks()

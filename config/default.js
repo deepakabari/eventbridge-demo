@@ -6,5 +6,6 @@ export default {
   customBus: process.env.CUSTOM_EVENT_BUS_ARN,
   defaultBus: process.env.DEFAULT_EVENT_BUS_ARN,
   eventBridgeSource: process.env.EVENT_BRIDGE_SOURCE,
-  sqsQueueUrl: process.env.SQS_QUEUE_URL
+  sqsQueueUrl: process.env.SQS_QUEUE_URL,
+  senderEmail: process.env.SENDER_EMAIL
 }
