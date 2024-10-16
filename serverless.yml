@@ -82,6 +82,24 @@ functions:
           path: send-email
           method: post
 
+  sendFifoMessage:
+    handler: handler.sendFifoMessage
+    role: DemoApiRole
+    environment:
+      SQS_FIFO_QUEUE_URL: !Ref MyFifoQueue
+    events:
+      - http:
+          path: send-fifo-message
+          method: post
+
+  receiveFifoMessage:
+    handler: handler.receiveFifoMessage
+    role: DemoApiRole
+    events:
+      - sqs: 
+          arn:
+            Fn::GetAtt: [MyFifoQueue, Arn]
+
 resources:
   Resources:
     EventBus:
@@ -93,6 +111,13 @@ resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: myQueue-dev
+
+    MyFifoQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: myFifoQueue-dev.fifo
+        FifoQueue: true
+        ContentBasedDeduplication: true
 
     ApiGatewayRestApi:
       Type: AWS::ApiGateway::RestApi
@@ -185,8 +210,10 @@ resources:
                     - sqs:SendMessage
                     - sqs:ReceiveMessage
                     - sqs:DeleteMessage
+                    - sqs:GetQueueAttributes
                   Resource:
                     - !GetAtt MyQueue.Arn
+                    - !GetAtt MyFifoQueue.Arn
           - PolicyName: ${self:service}-ses-policy-${self:provider.stage}
             PolicyDocument:
               Version: '2012-10-17'

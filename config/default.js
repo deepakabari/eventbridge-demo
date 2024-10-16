@@ -7,5 +7,6 @@ export default {
   defaultBus: process.env.DEFAULT_EVENT_BUS_ARN,
   eventBridgeSource: process.env.EVENT_BRIDGE_SOURCE,
   sqsQueueUrl: process.env.SQS_QUEUE_URL,
-  senderEmail: process.env.SENDER_EMAIL
+  senderEmail: process.env.SENDER_EMAIL,
+  sqsFifoQueueUrl: process.env.SQS_FIFO_QUEUE_URL
 }

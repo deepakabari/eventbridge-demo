@@ -1,5 +1,5 @@
 import {
-  SendMessageCommand,
+  SendMessageBatchCommand,
   ReceiveMessageCommand,
   DeleteMessageCommand
 } from '@aws-sdk/client-sqs'
@@ -7,15 +7,22 @@ import awsClients from '../utils/awsClient.js'
 const { sqsClient } = awsClients
 
 // Send a message to the queue
-const sendMessageToQueue = async (queueUrl, messageBody) => {
+const sendMessageToQueue = async (queueUrl, messages) => {
   try {
+    const entries = messages.map((message, index) => ({
+      Id: index.toString(),
+      MessageBody: JSON.stringify(message)
+    }))
+
     const params = {
       QueueUrl: queueUrl,
-      MessageBody: JSON.stringify(messageBody)
+      Entries: entries
     }
 
-    const command = new SendMessageCommand(params)
-    return await sqsClient.send(command)
+    const command = new SendMessageBatchCommand(params)
+    const response = await sqsClient.send(command)
+
+    return response.Successful.map(entry => entry.MessageId)
   } catch (error) {
     console.error('Error sending message:', error)
     throw error
