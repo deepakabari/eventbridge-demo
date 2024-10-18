@@ -5,6 +5,7 @@ import { sqsReceiverEvent } from './src/handlers/sqsReceiver.js'
 import { sesSendEmail } from './src/handlers/sesSendEmail.js'
 import { sendFifoMessage } from './src/handlers/sqsFifoEvent.js'
 import { receiveFifoMessage } from './src/handlers/sqsFifoEvent.js'
+import { putObject, getObject, deleteObject } from './src/handlers/s3Handlers.js'
 
 export {
   dispatchEvent,
@@ -13,5 +14,8 @@ export {
   sqsReceiverEvent,
   sesSendEmail,
   sendFifoMessage,
-  receiveFifoMessage
+  receiveFifoMessage,
+  putObject,
+  getObject,
+  deleteObject
 }

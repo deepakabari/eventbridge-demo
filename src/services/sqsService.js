@@ -4,6 +4,7 @@ import {
   DeleteMessageCommand
 } from '@aws-sdk/client-sqs'
 import awsClients from '../utils/awsClient.js'
+import { errorResponse } from '../utils/responseHandler.js'
 const { sqsClient } = awsClients
 
 // Send a message to the queue
@@ -25,7 +26,7 @@ const sendMessageToQueue = async (queueUrl, messages) => {
     return response.Successful.map(entry => entry.MessageId)
   } catch (error) {
     console.error('Error sending message:', error)
-    throw error
+    return errorResponse(500, 'Error sending message:', error)
   }
 }
 
@@ -43,7 +44,7 @@ const receiveMessagesFromQueue = async (queueUrl) => {
     return response.Messages || []
   } catch (error) {
     console.error('Error receiving messages:', error)
-    throw error
+    return errorResponse(500, 'Error receiving messages:', error)
   }
 }
 
@@ -59,7 +60,7 @@ const deleteMessageFromQueue = async (queueUrl, receiptHandle) => {
     return await sqsClient.send(command)
   } catch (error) {
     console.error('Error deleting message:', error)
-    throw error
+    return errorResponse(500, 'Error deleting message:', error)
   }
 }
 

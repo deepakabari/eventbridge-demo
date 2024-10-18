@@ -16,6 +16,7 @@ provider:
     EVENT_BRIDGE_SOURCE: ${env:EVENT_BRIDGE_SOURCE}
     ACCOUNT_ID: ${env:ACCOUNT_ID}
     SQS_QUEUE_URL: !Ref MyQueue
+    BUCKET_NAME: my-unique-bucket-dev
 
 plugins:
   - serverless-offline
@@ -96,9 +97,33 @@ functions:
     handler: handler.receiveFifoMessage
     role: DemoApiRole
     events:
-      - sqs: 
+      - sqs:
           arn:
             Fn::GetAtt: [MyFifoQueue, Arn]
+
+  putObject:
+    handler: handler.putObject
+    role: DemoApiRole
+    events:
+      - http:
+          path: s3/put
+          method: post
+
+  getObject:
+    handler: handler.getObject
+    role: DemoApiRole
+    events:
+      - http:
+          path: s3/get/{key}
+          method: get
+
+  deleteObject:
+    handler: handler.deleteObject
+    role: DemoApiRole
+    events:
+      - http:
+          path: s3/delete/{key}
+          method: delete
 
 resources:
   Resources:
@@ -118,6 +143,11 @@ resources:
         QueueName: myFifoQueue-dev.fifo
         FifoQueue: true
         ContentBasedDeduplication: true
+
+    MyS3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: my-unique-bucket-dev
 
     ApiGatewayRestApi:
       Type: AWS::ApiGateway::RestApi
@@ -226,3 +256,16 @@ resources:
                     - ses:CreateTemplate
                   Resource:
                     - '*'
+          - PolicyName: ${self:service}-s3-policy-${self:provider.stage}
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - s3:PutObject
+                    - s3:GetObject
+                    - s3:DeleteObject
+                    - s3:ListBucket
+                  Resource:
+                    - arn:aws:s3:::my-bucket-name-dev
+                    - arn:aws:s3:::my-bucket-name-dev/*

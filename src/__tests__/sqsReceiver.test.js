@@ -1,6 +1,6 @@
 import { sqsReceiverEvent } from '../handlers/sqsReceiver.js'
 import * as sqsService from '../services/sqsService.js'
-import { createResponse } from '../utils/responseHandler.js'
+import { successResponse, errorResponse } from '../utils/responseHandler.js'
 
 jest.mock('../services/sqsService.js')
 jest.mock('../utils/responseHandler.js')
@@ -18,12 +18,10 @@ describe('sqsReceiverEvent', () => {
     const response = await sqsReceiverEvent()
 
     expect(sqsService.deleteMessageFromQueue).toHaveBeenCalledTimes(mockMessages.length)
-    expect(createResponse).toHaveBeenCalledWith(200, 'Messages processed', {
+    expect(successResponse).toHaveBeenCalledWith('Messages processed', {
       count: mockMessages.length
     })
-    expect(response).toEqual(
-      createResponse(200, 'Messages processed', { count: mockMessages.length })
-    )
+    expect(response).toEqual(successResponse('Messages processed', { count: mockMessages.length }))
   })
 
   it('should return no messages response when no messages are received', async () => {
@@ -31,8 +29,8 @@ describe('sqsReceiverEvent', () => {
 
     const response = await sqsReceiverEvent()
 
-    expect(createResponse).toHaveBeenCalledWith(200, 'No messages to process')
-    expect(response).toEqual(createResponse(200, 'No messages to process'))
+    expect(successResponse).toHaveBeenCalledWith('No messages to process')
+    expect(response).toEqual(successResponse('No messages to process'))
   })
 
   it('should return error response on failure', async () => {
@@ -40,7 +38,7 @@ describe('sqsReceiverEvent', () => {
 
     const response = await sqsReceiverEvent()
 
-    expect(createResponse).toHaveBeenCalledWith(500, 'Failed to process messages')
-    expect(response).toEqual(createResponse(500, 'Failed to process messages'))
+    expect(errorResponse).toHaveBeenCalledWith(500, 'Failed to process messages')
+    expect(response).toEqual(errorResponse(500, 'Failed to process messages'))
   })
 })

@@ -1,5 +1,5 @@
 import { SendMessageCommand } from '@aws-sdk/client-sqs'
-import { createResponse } from '../utils/responseHandler.js'
+import { successResponse, errorResponse } from '../utils/responseHandler.js'
 import _ from 'lodash'
 import config from '../../config/default.js'
 import awsClient from '../utils/awsClient.js'
@@ -21,10 +21,10 @@ export const sendFifoMessage = async (event) => {
       await sqsClient.send(command)
       console.log(`Sent: ${message.body}`)
     }
-    return createResponse(200, 'Message sent to SQS FIFO queue!')
+    return successResponse('Message sent to SQS FIFO queue!')
   } catch (error) {
     console.error('Error sending message:', error)
-    return createResponse(500, 'Failed to send message')
+    return errorResponse(500, 'Failed to send message')
   }
 }
 
@@ -36,5 +36,5 @@ export const receiveFifoMessage = async (event) => {
 
   console.log('Received messages:', messages)
 
-  return createResponse(200, 'Messages received:', { messages })
+  return successResponse('Messages received:', { messages })
 }

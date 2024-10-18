@@ -1,5 +1,6 @@
 import { SendTemplatedEmailCommand } from '@aws-sdk/client-ses'
 import awsClient from '../utils/awsClient.js'
+import { errorResponse, successResponse } from '../utils/responseHandler.js'
 const { sesClient } = awsClient
 
 export const sendTemplatedEmail = async (params) => {
@@ -7,15 +8,9 @@ export const sendTemplatedEmail = async (params) => {
   try {
     const response = await sesClient.send(sendEmailCmd)
     console.log('Email sent response:', response)
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'Email sent successfully!', response })
-    }
-  } catch (sendError) {
-    console.error('Error sending email:', sendError)
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to send email.', details: sendError.message })
-    }
+    return successResponse('Email sent successfully', response)
+  } catch (error) {
+    console.error('Error sending email:', error)
+    return errorResponse(500, 'Failed to send email.', error.message)
   }
 }

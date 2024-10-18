@@ -1,6 +1,6 @@
 import { dispatchEvent } from '../handlers/dispatchEvent.js'
 import { dispatchEventToEventBridge } from '../services/eventDispatcherService.js'
-import { createResponse } from '../utils/responseHandler.js'
+import { successResponse, errorResponse } from '../utils/responseHandler.js'
 
 // this will mock the entire module
 jest.mock('../services/eventDispatcherService.js')
@@ -35,7 +35,7 @@ describe('dispatchEvent', () => {
     const response = await dispatchEvent(event)
 
     expect(response).toEqual(
-      createResponse(400, 'Invalid eventType. It must be either "created" or "updated".', {
+      errorResponse(400, 'Invalid eventType. It must be either "created" or "updated".', {
         eventType: 'Invalid'
       })
     )
@@ -51,7 +51,7 @@ describe('dispatchEvent', () => {
     const mockError = new Error('Failed to dispatch event')
     dispatchEventToEventBridge.mockRejectedValue(mockError)
 
-    createResponse.mockReturnValue({
+    errorResponse.mockReturnValue({
       statusCode: 500,
       body: JSON.stringify({ error: mockError.message })
     })

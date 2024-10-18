@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 import { createOrUpdateTemplate } from '../services/templateService.js'
 import { sendTemplatedEmail } from '../services/emailService.js'
 import { buildEmailParams } from '../utils/emailParams.js'
+import { errorResponse } from '../utils/responseHandler.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -19,9 +20,6 @@ export const sesSendEmail = async (event) => {
     return await sendTemplatedEmail(params)
   } catch (error) {
     console.error(error)
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to send email.' })
-    }
+    return errorResponse(500, error.message)
   }
 }

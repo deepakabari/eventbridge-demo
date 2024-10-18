@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import config from '../../config/default.js'
 import { receiveMessagesFromQueue, deleteMessageFromQueue } from '../services/sqsService.js'
-import { createResponse } from '../utils/responseHandler.js'
+import { successResponse, errorResponse } from '../utils/responseHandler.js'
 
 export const sqsReceiverEvent = async () => {
   try {
@@ -18,12 +18,12 @@ export const sqsReceiverEvent = async () => {
         console.log('Deleted message with receipt handle:', message.ReceiptHandle)
       }
 
-      return createResponse(200, 'Messages processed', { count: messages.length })
+      return successResponse('Messages processed', { count: messages.length })
     } else {
-      return createResponse(200, 'No messages to process')
+      return successResponse('No messages to process')
     }
   } catch (error) {
     console.error('Error receiving or deleting messages:', error)
-    return createResponse(500, 'Failed to process messages')
+    return errorResponse(500, 'Failed to process messages')
   }
 }
